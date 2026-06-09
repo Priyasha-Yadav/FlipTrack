@@ -39,7 +39,26 @@ export async function loader({ request }: Route.LoaderArgs) {
     }),
   ]);
 
-  return { inventoryStats, salesData, expensesData };
+  const serializedStats = {
+    _count: inventoryStats?._count || 0,
+    _sum: { purchasePrice: Number(inventoryStats?._sum?.purchasePrice || 0) }
+  };
+
+  const serializedSales = salesData.map(s => ({
+    ...s,
+    salePrice: Number(s.salePrice),
+    inventoryItem: {
+      ...s.inventoryItem,
+      purchasePrice: Number(s.inventoryItem.purchasePrice),
+    }
+  }));
+
+  const serializedExpenses = expensesData.map(e => ({
+    ...e,
+    amount: Number(e.amount)
+  }));
+
+  return { inventoryStats: serializedStats, salesData: serializedSales, expensesData: serializedExpenses };
 }
 
 export default function DashboardPage() {

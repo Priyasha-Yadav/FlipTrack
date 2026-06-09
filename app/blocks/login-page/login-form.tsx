@@ -42,7 +42,7 @@ export function LoginForm({ className }: Props) {
       <button 
         type="button" 
         className={styles.submitBtn} 
-        style={{ background: "transparent", border: "1px solid var(--color-border-strong)", marginTop: "var(--space-2)" }}
+        style={{ background: "transparent", border: "1px solid var(--color-border-strong)", marginTop: "var(--space-2)", color: "var(--color-text)" }}
         onClick={handleDemoLogin}
       >
         Use Demo Credentials

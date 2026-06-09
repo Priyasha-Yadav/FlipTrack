@@ -43,6 +43,13 @@ export async function action({ request }: Route.ActionArgs) {
       where: { id: authUser.id },
       data: { name, phone }
     });
+  } else if (intent === "update-preferences") {
+    const currency = formData.get("currency") as string;
+    const theme = formData.get("theme") as string;
+    await prisma.user.update({
+      where: { id: authUser.id },
+      data: { currency, theme }
+    });
   } else if (intent === "create-team") {
     const teamName = formData.get("teamName") as string;
     await prisma.$transaction(async (tx) => {

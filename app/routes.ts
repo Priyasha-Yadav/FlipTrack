@@ -38,4 +38,6 @@ export default [
   route("/api/cron/refresh-prices", "routes/api.cron.prices.ts"),
   route("/api/webhooks/stripe", "routes/api.stripe.ts"),
   route("/api/ai/price-insight", "routes/api.ai.insights.ts"),
+  route("/api/insights", "routes/api.insights.ts"),
+  route("/api/export/tax", "routes/api.export.tax.ts"),
 ] satisfies RouteConfig;

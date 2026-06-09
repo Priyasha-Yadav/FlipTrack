@@ -11,8 +11,6 @@ const columns = [
     links: [
       { label: "Features", to: "/features" },
       { label: "Pricing", to: "/pricing" },
-      { label: "Changelog", to: "/changelog" },
-      { label: "Roadmap", to: "/changelog" },
     ],
   },
   {

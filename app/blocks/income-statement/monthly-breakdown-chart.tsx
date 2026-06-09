@@ -2,11 +2,43 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { mockCashFlow } from "~/data/mock-data";
 import styles from "./monthly-breakdown-chart.module.css";
 
-interface Props { className?: string; }
+interface Props { className?: string; sales?: any[]; expenses?: any[]; }
 
-const data = mockCashFlow.map(d => ({ ...d, profit: d.revenue - d.expenses }));
-
-export function MonthlyBreakdownChart({ className }: Props) {
+export function MonthlyBreakdownChart({ className, sales = [], expenses = [] }: Props) {
+  // Group by month
+  const grouped: Record<string, { revenue: number, expenses: number, profit: number }> = {};
+  
+  // Last 6 months
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    const label = d.toLocaleString('default', { month: 'short' });
+    grouped[label] = { revenue: 0, expenses: 0, profit: 0 };
+  }
+  
+  sales.forEach(s => {
+    const d = new Date(s.saleDate);
+    const label = d.toLocaleString('default', { month: 'short' });
+    if (grouped[label]) {
+      grouped[label].revenue += Number(s.salePrice);
+      grouped[label].expenses += Number(s.inventoryItem.purchasePrice); // COGS
+    }
+  });
+  
+  expenses.forEach(e => {
+    const d = new Date(e.date);
+    const label = d.toLocaleString('default', { month: 'short' });
+    if (grouped[label]) {
+      grouped[label].expenses += Number(e.amount);
+    }
+  });
+  
+  const data = Object.keys(grouped).map(month => ({
+    month,
+    revenue: grouped[month].revenue,
+    expenses: grouped[month].expenses,
+    profit: grouped[month].revenue - grouped[month].expenses
+  }));
   return (
     <div className={[styles.card, className].filter(Boolean).join(" ")}>
       <div className={styles.title}>Monthly Breakdown</div>

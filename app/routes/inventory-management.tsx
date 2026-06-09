@@ -65,6 +65,25 @@ export async function action({ request }: Route.ActionArgs) {
         status: "IN_STOCK",
       }
     });
+  } else if (intent === "update") {
+    const itemId = formData.get("itemId") as string;
+    const sku = formData.get("sku") as string;
+    const name = formData.get("name") as string;
+    const brand = formData.get("brand") as string;
+    const size = formData.get("size") as string;
+    const purchasePrice = Number(formData.get("purchasePrice"));
+    
+    await prisma.inventoryItem.update({
+      where: { id: itemId, userId: user.id },
+      data: {
+        sku,
+        name,
+        brand,
+        size,
+        purchasePrice,
+        // other fields could be updated here
+      }
+    });
   } else if (intent === "delete") {
     const itemId = formData.get("itemId") as string;
     await prisma.inventoryItem.delete({
@@ -80,6 +99,7 @@ export default function InventoryManagementPage() {
   const [showAddItem, setShowAddItem] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
   return (
     <div className={styles.page}>
@@ -90,8 +110,9 @@ export default function InventoryManagementPage() {
       {selected.length > 0 && (
         <BulkActionsBar count={selected.length} onClear={() => setSelected([])} />
       )}
-      <InventoryTable selected={selected} onSelectChange={setSelected} items={items} />
+      <InventoryTable selected={selected} onSelectChange={setSelected} items={items} onEdit={setEditingItem} />
       {showAddItem && <AddItemModal onClose={() => setShowAddItem(false)} />}
+      {editingItem && <AddItemModal item={editingItem} onClose={() => setEditingItem(null)} />}
       {showImport && <ImportExcelModal onClose={() => setShowImport(false)} />}
     </div>
   );

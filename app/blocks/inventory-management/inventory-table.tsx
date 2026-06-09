@@ -1,12 +1,12 @@
 import { Link, Form } from "react-router";
 import styles from "./inventory-table.module.css";
 
-interface Props { className?: string; selected: string[]; onSelectChange: (ids: string[]) => void; items: any[]; }
+interface Props { className?: string; selected: string[]; onSelectChange: (ids: string[]) => void; items: any[]; onEdit: (item: any) => void; }
 
 const statusClass: Record<string, string> = { IN_STOCK: styles.inStock, LISTED: styles.listed, SOLD: styles.sold };
 const statusLabel: Record<string, string> = { IN_STOCK: "In Stock", LISTED: "Listed", SOLD: "Sold" };
 
-export function InventoryTable({ className, selected, onSelectChange, items }: Props) {
+export function InventoryTable({ className, selected, onSelectChange, items, onEdit }: Props) {
   const toggle = (id: string) => onSelectChange(selected.includes(id) ? selected.filter(s => s !== id) : [...selected, id]);
   const toggleAll = () => onSelectChange(selected.length === items.length ? [] : items.map(i => i.id));
 
@@ -42,7 +42,7 @@ export function InventoryTable({ className, selected, onSelectChange, items }: P
                   <td className={styles.td}><span className={[styles.badge, statusClass[item.status]].join(" ")}>{statusLabel[item.status] || item.status}</span></td>
                   <td className={styles.td}>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className={styles.actionBtn}>Edit</button>
+                      <button className={styles.actionBtn} onClick={() => onEdit(item)}>Edit</button>
                       <Form method="post" action="/app/inventory" style={{ display: 'inline' }}>
                         <input type="hidden" name="intent" value="delete" />
                         <input type="hidden" name="itemId" value={item.id} />

@@ -1,16 +1,41 @@
+import { Form } from "react-router";
 import styles from "./preferences.module.css";
 
-interface Props { className?: string; }
+interface Props { className?: string; user?: any; }
 
-export function Preferences({ className }: Props) {
+export function Preferences({ className, user }: Props) {
   return (
-    <div className={[styles.section, className].filter(Boolean).join(" ")}>
+    <Form method="post" className={[styles.section, className].filter(Boolean).join(" ")}>
+      <input type="hidden" name="intent" value="update-preferences" />
       <h2 className={styles.title}>Preferences</h2>
-      <div className={styles.field}><label className={styles.label}>Currency</label><select className={styles.select}><option>USD ($)</option><option>CAD (CA$)</option><option>GBP (£)</option><option>EUR (€)</option><option>AUD (A$)</option><option>JPY (¥)</option></select></div>
-      <div className={styles.field}><label className={styles.label}>Theme</label><select className={styles.select}><option>Light</option><option>Dark (Pro)</option><option>Unicorn (Business)</option></select></div>
-      <div className={styles.field}><label className={styles.label}>Language</label><select className={styles.select}><option>English</option><option>Spanish</option><option>French</option></select></div>
-      <div className={styles.field}><label className={styles.label}>Timezone</label><select className={styles.select}><option>US/Eastern</option><option>US/Pacific</option><option>UTC</option><option>Europe/London</option></select></div>
-      <button className={styles.saveBtn}>Save Preferences</button>
-    </div>
+      <div className={styles.field}>
+        <label className={styles.label}>Currency</label>
+        <select name="currency" defaultValue={user?.currency || "USD"} className={styles.select}>
+          <option value="USD">USD ($)</option>
+          <option value="CAD">CAD (CA$)</option>
+          <option value="GBP">GBP (£)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="AUD">AUD (A$)</option>
+          <option value="JPY">JPY (¥)</option>
+        </select>
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label}>Theme</label>
+        <select name="theme" defaultValue={user?.theme || "dark"} className={styles.select}>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System</option>
+        </select>
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label}>Language</label>
+        <select className={styles.select} defaultValue="English"><option>English</option><option>Spanish</option><option>French</option></select>
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label}>Timezone</label>
+        <select className={styles.select} defaultValue="US/Eastern"><option>US/Eastern</option><option>US/Pacific</option><option>UTC</option><option>Europe/London</option></select>
+      </div>
+      <button type="submit" className={styles.saveBtn}>Save Preferences</button>
+    </Form>
   );
 }

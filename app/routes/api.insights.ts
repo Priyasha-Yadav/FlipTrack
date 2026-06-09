@@ -5,9 +5,9 @@ import { generateText } from "ai";
 import { createGroq } from "@ai-sdk/groq";
 
 const prisma = new PrismaClient();
-const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function action({ request }: Route.ActionArgs) {
+  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
   const { supabase } = getSupabaseServerClient(request);
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -47,7 +47,7 @@ export async function action({ request }: Route.ActionArgs) {
     Analyze the user's business metrics and provide 3 concise, actionable bullet points of advice to improve their margins, cash flow, or operations. Keep it punchy, professional, and directly tied to their data. No fluff. Do not use markdown headers, just return a bulleted list.`;
 
     const { text } = await generateText({
-      model: groq("llama3-8b-8192"),
+      model: groq("llama-3.3-70b-versatile"),
       system: systemPrompt,
       prompt: promptData,
     });
