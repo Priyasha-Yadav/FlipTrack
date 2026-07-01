@@ -41,6 +41,23 @@ export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
+  if (intent === "toggle") {
+  const id = formData.get("id") as string;
+  const isActive = formData.get("isActive") === "true";
+
+  await prisma.recurringExpense.updateMany({
+    where: {
+      id,
+      userId:user.id
+    },
+    data: {
+      isActive,
+    },
+  });
+  return {ok: true,intent};
+
+  
+}
   if (intent === "create") {
     const isRecurring = formData.get("isRecurring") === "on";
     const type = formData.get("type") as any;
