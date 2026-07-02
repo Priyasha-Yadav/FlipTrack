@@ -42,7 +42,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   // Add Sales
   sales.forEach(s => {
     const revenue = Number(s.salePrice);
-    const cogs = Number(s.inventoryItem.purchasePrice);
+    const cogs = Number(s.inventoryItem.purchasePrice) + Number(s.platformFee) + Number(s.shippingCost);
     const net = revenue - cogs;
     
     csvContent += `Sale,${s.saleDate.toISOString().split('T')[0]},"${s.inventoryItem.name} (${s.inventoryItem.sku})",${s.marketplace},${revenue},${cogs},${net}\n`;

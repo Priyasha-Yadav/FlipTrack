@@ -55,6 +55,8 @@ export async function loader({ request }: Route.LoaderArgs) {
       where: { userId: user.id },
       select: {
         salePrice: true,
+        platformFee: true,
+        shippingCost: true,
         inventoryItem: {
           select: { purchasePrice: true },
         },
@@ -67,8 +69,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   allSalesMetrics.forEach((s) => {
     const salePrice = Number(s.salePrice);
     const cost = Number(s.inventoryItem.purchasePrice);
+    const platformFee = Number(s.platformFee);
+    const shippingCost = Number(s.shippingCost);
+
     totalRevenue += salePrice;
-    totalProfit += salePrice - cost;
+    totalProfit += salePrice - cost - platformFee - shippingCost;
   });
 
   return {
@@ -96,6 +101,10 @@ export async function action({ request }: Route.ActionArgs) {
   if (intent === "create") {
     const inventoryItemId = formData.get("inventoryItemId") as string;
     const salePrice = Number(formData.get("salePrice"));
+
+    const platformFee = Number(formData.get("platformFee") || 0);
+    const shippingCost = Number(formData.get("shippingCost") || 0);
+
     const saleDate = new Date(formData.get("saleDate") as string);
     const marketplace = formData.get("marketplace") as any;
     const trackingNumber = formData.get("trackingNumber") as string;
@@ -106,6 +115,8 @@ export async function action({ request }: Route.ActionArgs) {
           userId: user.id,
           inventoryItemId,
           salePrice,
+          platformFee,
+          shippingCost,
           saleDate,
           marketplace,
           trackingNumber,
