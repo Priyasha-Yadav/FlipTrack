@@ -43,6 +43,11 @@ export default [
   route("/api/ai/ocr", "routes/api.ai.ocr.ts"),
   route("/api/insights", "routes/api.insights.ts"),
   route("/api/export/tax", "routes/api.export.tax.ts"),
+  
+  // 🌟 Kept from main branch merge (Placed safely above dynamic route)
   route("/api/inventory/search", "routes/api.inventory.search.ts"),
   route("/api/integrations", "routes/api.integrations.ts"),
+  
+  // 🌟 Your dynamic showroom route (Must stay at the very end as a catch-all)
+  route("/:username", "routes/$username.tsx"),
 ] satisfies RouteConfig;
