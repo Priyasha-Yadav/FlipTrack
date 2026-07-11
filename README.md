@@ -200,31 +200,55 @@ The application will be running locally at `http://localhost:5173` .
 
 ## 🔐 Local Authentication
 
-FlipTrack uses **Supabase Auth** for authentication, while the dashboard data is stored in Prisma-managed tables.
+FlipTrack uses **Supabase Auth** for authentication, while the dashboard data is stored in Prisma-managed tables. 
 
-The local setup involves two separate scripts:
+To link the two systems, the application relies on the `User` table in the database having a record where `id` matches the Supabase Auth user ID (UUID) of the logged-in user.
 
-* `prisma/seed.ts` populates the database with demo inventory, sales, expenses, and other sample data.
-* `scripts/create-demo-user.ts` creates the demo user in Supabase Auth and synchronizes it with the application's `User` table.
+The local setup involves two separate scripts that must be run in the **exact order** below:
 
-Both scripts serve different purposes and should be run during local setup.
+1. `scripts/create-demo-user.ts`:
+   * Creates/registers the demo user (defaults to `demo@fliptrack.app`) in your Supabase Auth project.
+   * Retrieves the generated Supabase User ID (UUID) and creates/upserts a matching user record in the local database's `User` table using Prisma.
+2. `prisma/seed.ts`:
+   * Queries the database for the demo user using the configured email.
+   * Populates the database with demo inventory items, sales, expenses, and other mock dashboard data under that user's ID.
+
+> [!IMPORTANT]
+> You **must** run the scripts in this order. If you run the seed script first, the data will be seeded under a temporary ID, and the subsequent user creation script will fail with unique email constraint errors or cause the logged-in user to see an empty dashboard.
 
 ---
 
 ## 💡 Demo Credentials
 
-Want to test FlipTrack's UI and features without manually creating data? We have included an automated seed script that provisions a test user and sample inventory items.
+Want to test FlipTrack's UI and features without manually creating data? We have included automated scripts to provision the demo user and sample inventory items.
 
-1. Set `NEXT_PUBLIC_SUPABASE_URL`,  `NEXT_PUBLIC_SUPABASE_ANON_KEY`,  `DATABASE_URL`, and `DIRECT_URL` in `.env`.
-2. Run the seed and demo-user scripts:
+### Environment Variable Requirements
+Before running the scripts, ensure your `.env` file has:
+* `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+* `DATABASE_URL` and `DIRECT_URL`
+* `SUPABASE_SERVICE_ROLE_KEY` (Highly Recommended)
+  > [!NOTE]
+  > If `SUPABASE_SERVICE_ROLE_KEY` is provided, the script will automatically create a pre-confirmed user in Supabase Auth using admin privileges. If not, it falls back to the public sign-up API. If email confirmation is enabled in your Supabase project (default), you will need to manually confirm the user in your Supabase Dashboard (under Authentication → Users) to sign in.
 
-```bash
-npx tsx prisma/seed.ts
-npx tsx scripts/create-demo-user.ts
-```
+### Setup Steps
+1. Make sure your local PostgreSQL database (via Docker or local service) is running and your Prisma schema has been pushed:
+   ```bash
+   npx prisma db push
+   npx prisma generate
+   ```
+2. Run the demo setup scripts in the correct order:
+   ```bash
+   # 1. Create the user in Supabase and sync to database first
+   npx tsx scripts/create-demo-user.ts
 
-3. Start the development server with `npm run dev`.
-4. Open `http://localhost:5173/auth/login` and click **"Use Demo Credentials"** to autofill the demo Supabase Auth account.
+   # 2. Seed the inventory data under that user
+   npx tsx prisma/seed.ts
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. Navigate to `http://localhost:5173/auth/login` and click the **"Use Demo Credentials"** button on the login form to instantly authenticate (using `demo@fliptrack.app` / `password123`) and view the populated dashboard.
 
 ---
 
