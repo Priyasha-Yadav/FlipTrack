@@ -2,37 +2,54 @@ import { useState } from "react";
 import { getSupabaseBrowserClient } from "~/utils/supabase.client";
 import styles from "./magic-link-option.module.css";
 
-interface Props { className?: string; }
+interface Props {
+  className?: string;
+}
 
 export function MagicLinkOption({ className }: Props) {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleSend = async () => {
-    if (!email) {
-      setError("Email is required");
+  const handleSendLink = async () => {
+    setErrorMsg(null);
+
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setErrorMsg("Please enter your email.");
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      setErrorMsg("Please enter a valid email address.");
+      return;
+    }
+
     setLoading(true);
-    setError(null);
     try {
       const supabase = getSupabaseBrowserClient();
-      const { error: authError } = await supabase.auth.signInWithOtp({
-        email,
+      if (!supabase) {
+        setErrorMsg("Supabase is not configured (missing URL/anon key).");
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email: trimmed,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-      if (authError) throw authError;
+
+      if (error) throw error;
       setSent(true);
     } catch (err: any) {
       console.error("Magic link error:", err);
-      setError(
+      setErrorMsg(
         err.message === "fetch failed"
           ? "Unable to connect to the authentication server. Please try again later."
-          : err.message
+          : err?.message || "Failed to send magic link."
       );
     } finally {
       setLoading(false);
@@ -46,28 +63,35 @@ export function MagicLinkOption({ className }: Props) {
         <span className={styles.dividerText}>or sign in with magic link</span>
         <div className={styles.line} />
       </div>
-      {error && (
-        <div style={{ color: "red", fontSize: 14, marginBottom: 12 }}>{error}</div>
-      )}
+
       {sent ? (
         <div className={styles.success}>Magic link sent! Check your email.</div>
       ) : (
         <div className={styles.magicForm}>
-          <input 
-            className={styles.input} 
-            type="email" 
-            placeholder="your@email.com" 
+          <input
+            className={styles.input}
+            type="email"
+            placeholder="your@email.com"
+            aria-label="Enter your email for a magic link"
+            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
           />
           <button 
             className={styles.sendBtn} 
-            onClick={handleSend}
+            aria-label="Send Magic Link" 
+            onClick={handleSendLink} 
             disabled={loading}
           >
             {loading ? "Sending..." : "Send Link"}
           </button>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className={styles.error}>
+          {errorMsg}
         </div>
       )}
     </div>

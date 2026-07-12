@@ -4,8 +4,19 @@ import { createCookieSessionStorage } from "react-router";
 export function getSupabaseServerClient(request: Request) {
   const headers = new Headers();
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const supabaseUrl =
+    import.meta.env.VITE_NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    // fallback to non-vite env keys currently present in your .env
+    process.env.SUPABASE_URL!;
+
+  const supabaseKey =
+    import.meta.env.VITE_NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    // fallback to non-vite env keys currently present in your .env
+    process.env.SUPABASE_PUBLISHABLE_KEY!;
+
+
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
