@@ -69,12 +69,13 @@ export function MagicLinkOption({ className }: Props) {
             className={styles.input}
             type="email"
             placeholder="your@email.com"
+            aria-label="Enter your email for a magic link"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
           />
-          <button className={styles.sendBtn} onClick={handleSendLink} disabled={loading}>
+          <button className={styles.sendBtn} aria-label="Send Magic Link" onClick={handleSendLink} disabled={loading}>
             {loading ? "Sending..." : "Send Link"}
           </button>
         </div>
