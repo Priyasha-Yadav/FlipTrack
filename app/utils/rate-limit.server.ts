@@ -46,6 +46,18 @@ export async function rateLimit(
 
   
 
+  if (Math.random() < 0.01) {
+    await prisma.rateLimit
+      .deleteMany({
+        where: {
+          resetAt: {
+            lte: now,
+          },
+        },
+      })
+      .catch(console.error);
+  }
+
   if (result.count > limit) {
     throw new Response(
       JSON.stringify({
@@ -58,16 +70,5 @@ export async function rateLimit(
         },
       }
     );
-  }
-  if (Math.random() < 0.01) {
-    prisma.rateLimit
-      .deleteMany({
-        where: {
-          resetAt: {
-            lte: now,
-          },
-        },
-      })
-      .catch(console.error);
   }
 }
